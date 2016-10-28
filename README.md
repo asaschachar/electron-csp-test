@@ -1,38 +1,17 @@
-# electron-quick-start
+# electron-csp-test
 
-**Clone and run for a quick way to see an Electron in action.**
+**Clone and run for an example of [Electron Issue 6465](https://github.com/electron/electron/issues/6465)**
 
-This is a minimal Electron application based on the [Quick Start Guide](http://electron.atom.io/docs/latest/tutorial/quick-start) within the Electron documentation.
+This is a minimal Electron application used to reproduce the issue where you can only register certain protocol schemes (i.e. https, file) as bypassing a page's CSP policy with webFrame.registerURLSchemeAsBypassingCSP(scheme) instead of being able to use a finer control over bypassing a page's CSP policy with things like CSP [Source Lists](https://developer.mozilla.org/en-US/docs/Web/Security/CSP/CSP_policy_directives#Source_lists) like http://\*.example.com
 
-**Use this app along with the [Electron API Demos](http://electron.atom.io/#get-started) app for API code examples to help you get started.**
+Explanation of the application:
 
-A basic Electron application needs just these files:
+* The main browser window loads two webviews. Both webviews load https://github.com.
+* Both webviews try to load a remote script from https://hosted-script.herokuapp.com/alert.js
+* One webview registers the scheme `https` as bypassing CSP, which works as can be seen by the console log in the developer tools of the webview:
 
-- `package.json` - Points to the app's main file and lists its details and dependencies.
-- `main.js` - Starts the app and creates a browser window to render HTML. This is the app's **main process**.
-- `index.html` - A web page to render. This is the app's **renderer process**.
+![Alt text](./screenshots/WorkingCSP3.png?raw=true "Working CSP")
 
-You can learn more about each of these components within the [Quick Start Guide](http://electron.atom.io/docs/latest/tutorial/quick-start).
+* The other webview registers the scheme `https://\*.herokuapp.com`, which fails because the script is blocked by github's CSP scheme as can be seen by the console log in the developer tools of the webview:
 
-## To Use
-
-To clone and run this repository you'll need [Git](https://git-scm.com) and [Node.js](https://nodejs.org/en/download/) (which comes with [npm](http://npmjs.com)) installed on your computer. From your command line:
-
-```bash
-# Clone this repository
-git clone https://github.com/electron/electron-quick-start
-# Go into the repository
-cd electron-quick-start
-# Install dependencies and run the app
-npm install && npm start
-```
-
-Learn more about Electron and its API in the [documentation](http://electron.atom.io/docs/latest).
-
-## Other Example Apps
-
-For more example apps, see the
-[list of boilerplates](http://electron.atom.io/community/#boilerplates)
-created by the awesome electron community.
-
-#### License [CC0 1.0 (Public Domain)](LICENSE.md)
+![Alt text](./screenshots/BrokenCSP3.png?raw=true "Broken CSP")
